@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090b">
+<title>Red Bot</title>
+<link rel="preload" as="image" href="fish/haddock.webp">
+<link rel="preload" as="image" href="fish/cod.jpg">
+<link rel="preload" as="image" href="fish/fluke.jpg">
+<link rel="preload" as="image" href="fish/bass.jpg">
+<style>
+  :root {
+    --bg: #07090b;
+    --wet: #10161b;
+    --ink: #f1efe9;
+    --dim: #b7b3aa;
+    --line: rgba(241, 239, 233, 0.28);
+    --red: #c4272e;
+    --yellow: #e0b31a;
+    --green: #1d7a40;
+    --ink-on-yellow: #16140c;
+  }
+  * { box-sizing: border-box; }
+  html { background: #040506; }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    background: #040506;
+    color: var(--ink);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  button, input { font: inherit; color: inherit; }
+  button {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .phone {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100dvh;
+    background: var(--bg);
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .screen {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: calc(16px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));
+    background:
+      linear-gradient(180deg, rgba(180, 200, 210, 0.05), transparent 22%),
+      var(--bg);
+  }
+  .back {
+    align-self: flex-start;
+    background: transparent;
+    border: 0;
+    padding: 4px 2px 10px 0;
+    font-size: 16px;
+    font-weight: 650;
+    color: var(--ink);
+  }
+  h1 {
+    margin: 12px 0 0;
+    font-size: 34px;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .lede, .portrait, .chase, .aside, .habit, .in {
+    margin: 14px 0 0;
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .portrait { margin-top: 18px; }
+  .chase { font-weight: 700; }
+  .aside, .habit { color: var(--dim); font-size: 17px; margin-top: 10px; }
+  .in { margin-top: 18px; }
+  .note {
+    min-height: 2.6em;
+    margin: 12px 0 14px;
+    font-size: 16px;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .grow { flex: 1; min-height: 16px; }
+  .go, .choice, .swatch { border: 0; border-radius: 3px; }
+  .go {
+    width: 100%;
+    min-height: 64px;
+    margin-top: 18px;
+    background: var(--ink);
+    color: #111;
+    font-size: 18px;
+    font-weight: 750;
+  }
+  .go:active, .choice:active, .swatch:active { transform: scale(0.985); }
+  .namein {
+    width: 100%;
+    margin-top: 28px;
+    padding: 12px 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--line);
+    border-radius: 0;
+    color: var(--ink);
+    font-size: 30px;
+    font-weight: 650;
+    line-height: 1.2;
+  }
+  .namein:focus { outline: none; border-bottom-color: var(--ink); }
+  .namein.bad { border-bottom-color: var(--red); }
+  .namein::placeholder { color: rgba(241, 239, 233, 0.35); }
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choice {
+    width: 100%;
+    min-height: 58px;
+    padding: 0 16px;
+    text-align: left;
+    background: var(--wet);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-size: 18px;
+    font-weight: 650;
+  }
+  .choice.on {
+    background: var(--ink);
+    color: #111;
+    border-color: var(--ink);
+  }
+  .nudge {
+    min-height: 1.3em;
+    margin: 10px 0 0;
+    font-size: 15px;
+    color: var(--dim);
+  }
+  .fish {
+    position: relative;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: #05070a;
+  }
+  .hero {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 42%;
+  }
+  .veil {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top,
+      rgba(5, 8, 10, 0.94) 0%,
+      rgba(5, 8, 10, 0.82) 18%,
+      rgba(5, 8, 10, 0.28) 46%,
+      rgba(5, 8, 10, 0.18) 100%);
+    pointer-events: none;
+  }
+  .fish .back {
+    position: absolute;
+    z-index: 2;
+    top: calc(10px + env(safe-area-inset-top));
+    left: 12px;
+    background: rgba(5, 8, 10, 0.62);
+    padding: 8px 12px;
+  }
+  .hud {
+    position: relative;
+    z-index: 1;
+    padding: 0 14px calc(14px + env(safe-area-inset-bottom));
+  }
+  .species {
+    margin: 0;
+    font-size: clamp(40px, 12vw, 56px);
+    font-weight: 780;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+  }
+  .talk {
+    margin: 8px 0 0;
+    max-width: 34em;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: rgba(241, 239, 233, 0.86);
+  }
+  .confirm {
+    min-height: 2.7em;
+    margin: 8px 0 12px;
+    font-size: 16px;
+    font-weight: 650;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .swatch {
+    min-height: 84px;
+    font-size: 18px;
+    font-weight: 780;
+    color: var(--ink);
+  }
+  .swatch.red { background: var(--red); }
+  .swatch.yellow { background: var(--yellow); color: var(--ink-on-yellow); }
+  .swatch.green { background: var(--green); }
+  .swatch.on { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .who {
+    margin: 8px 0 0;
+    font-size: clamp(42px, 12vw, 60px);
+    font-weight: 780;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    overflow-wrap: anywhere;
+  }
+  .saved {
+    min-height: 1.3em;
+    margin: 10px 0 0;
+    font-size: 15px;
+    color: var(--dim);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .screen, .fish { animation: cut 160ms linear; }
+  }
+  @keyframes cut {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="phone" id="app"></div>
+<script>
+(function () {
+  var KEY = "redbot-onboarding";
+  var FISH = [
+    {
+      id: "haddock",
+      name: "Haddock",
+      src: "fish/haddock.webp",
+      talk: "Out of the hold while the weather's still on us."
+    },
+    {
+      id: "cod",
+      name: "Cod",
+      src: "fish/cod.jpg",
+      talk: "A family caught this. Unloading it is how they get paid."
+    },
+    {
+      id: "fluke",
+      name: "Fluke",
+      src: "fish/fluke.jpg",
+      talk: "Cold fish, wet deck, straight off the boat."
+    },
+    {
+      id: "bass",
+      name: "Black sea bass",
+      src: "fish/bass.jpg",
+      talk: "All night if that's what it takes. Fish boots. That's the damn job."
+    }
+  ];
+  var COOK = ["Pan", "Oven", "Grill", "Barely", "I don't"];
+  var REACH = [
+    "One text a day",
+    "Only when my fish lands",
+    "Only when it's special"
+  ];
+  var COLOR_NOTE = {
+    green: "That's yours. I'll watch the boats.",
+    yellow: "Maybe. I'll keep it in mind.",
+    red: "Got it. I won't bring it."
+  };
+  var COOK_NOTE = {
+    "Pan": "Pan. Easy.",
+    "Oven": "Oven. I'll remember.",
+    "Grill": "Grill. Got it.",
+    "Barely": "Barely. Good.",
+    "I don't": "You don't cook. I'll still find the fish."
+  };
+  var REACH_NOTE = {
+    "One text a day": "Once a day. I'll keep it short.",
+    "Only when my fish lands": "Only when it hits the dock.",
+    "Only when it's special": "Only when it's worth a text."
+  };
+
+  var app = document.getElementById("app");
+  var timer = null;
+  var state = load();
+
+  function load() {
+    var blank = {
+      name: "",
+      reactions: {},
+      cook: "",
+      reach: "",
+      step: "intro",
+      fishIndex: 0,
+      done: false
+    };
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return blank;
+      var d = JSON.parse(raw);
+      if (!d || typeof d !== "object") return blank;
+      var reactions = {};
+      var src = d.reactions && typeof d.reactions === "object" ? d.reactions : {};
+      FISH.forEach(function (f) {
+        if (src[f.id] === "red" || src[f.id] === "yellow" || src[f.id] === "green") {
+          reactions[f.id] = src[f.id];
+        }
+      });
+      blank.name = typeof d.name === "string" ? d.name : "";
+      blank.reactions = reactions;
+      blank.cook = COOK.indexOf(d.cook) >= 0 ? d.cook : "";
+      blank.reach = REACH.indexOf(d.reach) >= 0 ? d.reach : "";
+      var steps = ["intro", "name", "fish", "cook", "reach", "portrait"];
+      blank.step = steps.indexOf(d.step) >= 0 ? d.step : "intro";
+      var idx = parseInt(d.fishIndex, 10);
+      if (isNaN(idx) || idx < 0) idx = 0;
+      if (FISH.length) idx = Math.min(idx, FISH.length - 1);
+      blank.fishIndex = idx;
+      blank.done = !!d.done;
+      if (blank.step === "fish" && !FISH.length) blank.step = "cook";
+      return blank;
+    } catch (e) {
+      return blank;
+    }
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
+  function names(color) {
+    var out = [];
+    FISH.forEach(function (f) {
+      if (state.reactions[f.id] === color) out.push(f.name);
+    });
+    return out;
+  }
+
+  function joinNames(list) {
+    var n = list.map(function (s) { return s.toLowerCase(); });
+    if (n.length <= 1) return n[0] || "";
+    if (n.length === 2) return n[0] + " and " + n[1];
+    return n.slice(0, -1).join(", ") + ", and " + n[n.length - 1];
+  }
+
+  function chaseLine() {
+    var g = names("green");
+    if (!g.length) return "Nothing green. I'll wait till you want one.";
+    if (g.length === 1) return "I'll chase " + g[0].toLowerCase() + " when it lands.";
+    return "I'll chase " + joinNames(g) + " when they land.";
+  }
+
+  function asideLine() {
+    var bits = [];
+    var y = names("yellow");
+    var r = names("red");
+    if (y.length) bits.push("Maybe " + joinNames(y) + ".");
+    if (r.length) bits.push("I won't bring " + joinNames(r) + ".");
+    return bits.join(" ");
+  }
+
+  function habitLine() {
+    var cook = {
+      "Pan": "Pan.",
+      "Oven": "Oven.",
+      "Grill": "Grill.",
+      "Barely": "Barely cooked.",
+      "I don't": "You don't cook."
+    }[state.cook] || "";
+    var reach = {
+      "One text a day": "I'll text once a day.",
+      "Only when my fish lands": "I'll text when your fish lands.",
+      "Only when it's special": "I'll text only when it's worth it."
+    }[state.reach] || "";
+    return [cook, reach].filter(Boolean).join(" ");
+  }
+
+  function backBtn() {
+    return '<button class="back" type="button" data-act="back">Back</button>';
+  }
+
+  function choiceHtml(value, on) {
+    return '<button class="choice' + (on ? " on" : "") + '" type="button" data-value="' + esc(value) + '">' + esc(value) + "</button>";
+  }
+
+  function render() {
+    clearTimeout(timer);
+    var html = "";
+    if (state.step === "intro") {
+      html = '<section class="screen">' +
+        "<h1>I'm Red Bot.</h1>" +
+        '<p class="lede">Boats come in all night. We unload them. All weather. Fish boots. The families who caught it get paid, and somebody eats.</p>' +
+        '<p class="lede">Not a fancy app. The real chain.</p>' +
+        '<p class="lede">Green if you want it. Yellow if maybe. Red if you don\'t.</p>' +
+        '<div class="grow"></div>' +
+        '<button class="go" type="button" data-act="show">Let me in</button>' +
+        "</section>";
+    } else if (state.step === "name") {
+      html = '<section class="screen">' + backBtn() +
+        "<h1>What do I call you?</h1>" +
+        '<input class="namein" id="name" autocomplete="given-name" enterkeyhint="go" placeholder="Name" value="' + esc(state.name) + '">' +
+        '<p class="nudge" id="nudge"></p>' +
+        '<div class="grow"></div>' +
+        '<button class="go" type="button" data-act="name">That\'s my name</button>' +
+        "</section>";
+    } else if (state.step === "fish") {
+      var fish = FISH[state.fishIndex];
+      var prev = state.reactions[fish.id] || "";
+      html = '<section class="fish">' + backBtn() +
+        '<img class="hero" alt="' + esc(fish.name) + '" src="' + esc(fish.src) + '">' +
+        '<div class="veil"></div>' +
+        '<div class="hud">' +
+          '<h1 class="species">' + esc(fish.name) + "</h1>" +
+          '<p class="talk">' + esc(fish.talk) + "</p>" +
+          '<p class="confirm" id="note" aria-live="polite">' + esc(prev ? COLOR_NOTE[prev] : "") + "</p>" +
+          '<div class="row">' +
+            '<button class="swatch red' + (prev === "red" ? " on" : "") + '" type="button" data-c="red">Red</button>' +
+            '<button class="swatch yellow' + (prev === "yellow" ? " on" : "") + '" type="button" data-c="yellow">Yellow</button>' +
+            '<button class="swatch green' + (prev === "green" ? " on" : "") + '" type="button" data-c="green">Green</button>' +
+          "</div>" +
+        "</div></section>";
+    } else if (state.step === "cook") {
+      html = '<section class="screen">' + backBtn() +
+        "<h1>How do you cook?</h1>" +
+        '<p class="note" id="note" aria-live="polite">' + esc(state.cook ? COOK_NOTE[state.cook] : "") + "</p>" +
+        '<div class="choices">' +
+          COOK.map(function (c) { return choiceHtml(c, c === state.cook); }).join("") +
+        "</div></section>";
+    } else if (state.step === "reach") {
+      html = '<section class="screen">' + backBtn() +
+        "<h1>How do I reach you?</h1>" +
+        '<p class="note" id="note" aria-live="polite">' + esc(state.reach ? REACH_NOTE[state.reach] : "") + "</p>" +
+        '<div class="choices">' +
+          REACH.map(function (c) { return choiceHtml(c, c === state.reach); }).join("") +
+        "</div></section>";
+    } else {
+      var aside = asideLine();
+      var habit = habitLine();
+      html = '<section class="screen">' + backBtn() +
+        '<h1 class="who">' + esc(state.name.trim() || "You") + "</h1>" +
+        '<p class="portrait">Call me the concierge on the pier. I unloaded the boats. Now I look out for your dinner.</p>' +
+        '<p class="chase">' + esc(chaseLine()) + "</p>" +
+        (aside ? '<p class="aside">' + esc(aside) + "</p>" : "") +
+        (habit ? '<p class="habit">' + esc(habit) + "</p>" : "") +
+        '<p class="in">You\'re in. Past the wholesale chain, with the people who unload the boats.</p>' +
+        '<div class="grow"></div>' +
+        '<button class="go" type="button" data-act="done">This is me</button>' +
+        '<p class="saved" id="saved">' + (state.done ? "Saved. I'll watch the boats." : "") + "</p>" +
+        "</section>";
+    }
+    app.innerHTML = html;
+    bind();
+    save();
+  }
+
+  function bind() {
+    var back = app.querySelector("[data-act=back]");
+    if (back) back.addEventListener("click", goBack);
+    var show = app.querySelector("[data-act=show]");
+    if (show) show.addEventListener("click", function () {
+      state.step = "name";
+      render();
+    });
+    var nameGo = app.querySelector("[data-act=name]");
+    var nameInput = app.querySelector("#name");
+    if (nameInput) {
+      nameInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          commitName();
+        }
+      });
+      nameInput.focus();
+      var v = nameInput.value;
+      nameInput.setSelectionRange(v.length, v.length);
+    }
+    if (nameGo) nameGo.addEventListener("click", commitName);
+    app.querySelectorAll(".swatch").forEach(function (b) {
+      b.addEventListener("click", function () { pickFish(b.getAttribute("data-c")); });
+    });
+    if (state.step === "cook") {
+      app.querySelectorAll(".choice").forEach(function (b) {
+        b.addEventListener("click", function () { pickCook(b.getAttribute("data-value")); });
+      });
+    }
+    if (state.step === "reach") {
+      app.querySelectorAll(".choice").forEach(function (b) {
+        b.addEventListener("click", function () { pickReach(b.getAttribute("data-value")); });
+      });
+    }
+    var done = app.querySelector("[data-act=done]");
+    if (done) done.addEventListener("click", function () {
+      state.done = true;
+      state.step = "portrait";
+      save();
+      var saved = document.getElementById("saved");
+      if (saved) saved.textContent = "Saved. I'll watch the boats.";
+    });
+  }
+
+  function commitName() {
+    var input = document.getElementById("name");
+    var name = input ? input.value.trim() : "";
+    if (!name) {
+      if (input) {
+        input.classList.add("bad");
+        input.focus();
+      }
+      var nudge = document.getElementById("nudge");
+      if (nudge) nudge.textContent = "I need a name.";
+      return;
+    }
+    state.name = name;
+    state.step = FISH.length ? "fish" : "cook";
+    state.fishIndex = 0;
+    render();
+  }
+
+  function pickFish(color) {
+    var fish = FISH[state.fishIndex];
+    if (!fish || !COLOR_NOTE[color]) return;
+    state.reactions[fish.id] = color;
+    save();
+    var note = document.getElementById("note");
+    if (note) note.textContent = COLOR_NOTE[color];
+    app.querySelectorAll(".swatch").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-c") === color);
+    });
+    var idx = state.fishIndex;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      if (state.step !== "fish" || state.fishIndex !== idx) return;
+      if (idx < FISH.length - 1) {
+        state.fishIndex = idx + 1;
+        state.step = "fish";
+      } else {
+        state.step = "cook";
+      }
+      render();
+    }, 880);
+  }
+
+  function pickCook(value) {
+    if (COOK.indexOf(value) < 0) return;
+    state.cook = value;
+    save();
+    markChoice(value);
+    var note = document.getElementById("note");
+    if (note) note.textContent = COOK_NOTE[value];
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      if (state.step !== "cook") return;
+      state.step = "reach";
+      render();
+    }, 700);
+  }
+
+  function pickReach(value) {
+    if (REACH.indexOf(value) < 0) return;
+    state.reach = value;
+    save();
+    markChoice(value);
+    var note = document.getElementById("note");
+    if (note) note.textContent = REACH_NOTE[value];
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      if (state.step !== "reach") return;
+      state.step = "portrait";
+      render();
+    }, 700);
+  }
+
+  function markChoice(value) {
+    app.querySelectorAll(".choice").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-value") === value);
+    });
+  }
+
+  function goBack() {
+    clearTimeout(timer);
+    if (state.step === "name") state.step = "intro";
+    else if (state.step === "fish") {
+      if (state.fishIndex > 0) state.fishIndex -= 1;
+      else state.step = "name";
+    } else if (state.step === "cook") {
+      if (FISH.length) {
+        state.step = "fish";
+        state.fishIndex = FISH.length - 1;
+      } else state.step = "name";
+    } else if (state.step === "reach") state.step = "cook";
+    else if (state.step === "portrait") state.step = "reach";
+    render();
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
