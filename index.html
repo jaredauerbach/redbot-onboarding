@@ -251,18 +251,18 @@
 (function () {
   var KEY = "redbot-onboarding";
   var FISH = [
-    { id: "haddock", name: "Haddock", src: "fish/haddock.webp" },
+    { id: "haddock", name: "Haddock", src: "fish/haddock.webp", line: "Captain Brian Pearce, Gracelyn Jane. Portland ME, Gillnet." },
     { id: "salmon", name: "Salmon", src: "fish/salmon.jpg" },
-    { id: "scallops", name: "Scallops", src: "fish/scallops.jpg" },
-    { id: "cod", name: "Cod", src: "fish/cod.jpg" },
+    { id: "scallops", name: "Scallops", src: "fish/scallops.jpg", line: "Captain William Ligenza, Small Stuff. Chatham MA - Pier, Dredge." },
+    { id: "cod", name: "Cod", src: "fish/cod.jpg", line: "Captain Brian Pearce, Gracelyn Jane. Portland ME, Gillnet." },
     { id: "shrimp", name: "Shrimp", src: "fish/shrimp.jpg" },
-    { id: "fluke", name: "Fluke", src: "fish/fluke.jpg" },
-    { id: "swordfish", name: "Swordfish", src: "fish/swordfish.jpg" },
-    { id: "bass", name: "Black sea bass", src: "fish/bass.jpg" },
-    { id: "tuna", name: "Tuna", src: "fish/tuna.jpg" },
-    { id: "monkfish", name: "Monkfish", src: "fish/monkfish.jpg" },
+    { id: "fluke", name: "Fluke", src: "fish/fluke.jpg", line: "Captain Leonard Michaud, Southpaw. Sandwich MA, Otter Trawl." },
+    { id: "swordfish", name: "Swordfish", src: "fish/swordfish.jpg", line: "Captain Jonathan  Holdgate, Lisa Lynn. Chatham MA - Stage Harbor, Rod and Reel." },
+    { id: "bass", name: "Black sea bass", src: "fish/bass.jpg", line: "Captain SAMUEL LUCARELLI, KINTSUGI. Chatham MA - Stage Harbor, Pots." },
+    { id: "tuna", name: "Tuna", src: "fish/tuna.jpg", line: "Captain Jonathan  Holdgate, Lisa Lynn. Chatham MA - Stage Harbor, Rod and Reel." },
+    { id: "monkfish", name: "Monkfish", src: "fish/monkfish.jpg", line: "Captain Sean Michael Connors, SHANNON KRISTINE. Chatham MA - Pier, Gillnet." },
     { id: "lobster", name: "Lobster", src: "fish/lobster.jpg" },
-    { id: "sole", name: "Sole", src: "fish/sole.jpg" }
+    { id: "sole", name: "Sole", src: "fish/sole.jpg", line: "Captain Michael Goodwin - Jillion Peri, Jillion Peri. Portland ME, Otter Trawl." }
   ];
   var COOK = ["Pan", "Oven", "Grill", "Barely", "I don't"];
   var REACH = [
@@ -426,6 +426,7 @@
         '<div class="veil"></div>' +
         '<div class="hud">' +
           '<h1 class="species">' + esc(fish.name) + "</h1>" +
+          (fish.line ? '<p class="talk">' + esc(fish.line) + "</p>" : "") +
           '<p class="confirm" id="note" aria-live="polite">' + esc(prev ? colorNote(fish, prev) : "") + "</p>" +
           '<div class="row">' +
             '<button class="swatch red' + (prev === "red" ? " on" : "") + '" type="button" data-c="red">Red</button>' +
