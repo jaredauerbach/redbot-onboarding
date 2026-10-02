@@ -6,9 +6,7 @@
 <meta name="theme-color" content="#07090b">
 <title>Red Bot</title>
 <link rel="preload" as="image" href="fish/haddock.webp">
-<link rel="preload" as="image" href="fish/cod.jpg">
-<link rel="preload" as="image" href="fish/fluke.jpg">
-<link rel="preload" as="image" href="fish/bass.jpg">
+<link rel="preload" as="image" href="fish/salmon.jpg">
 <style>
   :root {
     --bg: #07090b;
@@ -83,7 +81,8 @@
     line-height: 1.35;
     color: var(--ink);
   }
-  .portrait { margin-top: 18px; }
+  .portrait { margin-top: 16px; }
+  .portrait + .portrait { margin-top: 8px; }
   .chase { font-weight: 700; }
   .aside, .habit { color: var(--dim); font-size: 17px; margin-top: 10px; }
   .in { margin-top: 18px; }
@@ -252,30 +251,18 @@
 (function () {
   var KEY = "redbot-onboarding";
   var FISH = [
-    {
-      id: "haddock",
-      name: "Haddock",
-      src: "fish/haddock.webp",
-      talk: "Out of the hold while the weather's still on us."
-    },
-    {
-      id: "cod",
-      name: "Cod",
-      src: "fish/cod.jpg",
-      talk: "A family caught this. Unloading it is how they get paid."
-    },
-    {
-      id: "fluke",
-      name: "Fluke",
-      src: "fish/fluke.jpg",
-      talk: "Cold fish, wet deck, straight off the boat."
-    },
-    {
-      id: "bass",
-      name: "Black sea bass",
-      src: "fish/bass.jpg",
-      talk: "All night if that's what it takes. Fish boots. That's the damn job."
-    }
+    { id: "haddock", name: "Haddock", src: "fish/haddock.webp" },
+    { id: "salmon", name: "Salmon", src: "fish/salmon.jpg" },
+    { id: "scallops", name: "Scallops", src: "fish/scallops.jpg" },
+    { id: "cod", name: "Cod", src: "fish/cod.jpg" },
+    { id: "shrimp", name: "Shrimp", src: "fish/shrimp.jpg" },
+    { id: "fluke", name: "Fluke", src: "fish/fluke.jpg" },
+    { id: "swordfish", name: "Swordfish", src: "fish/swordfish.jpg" },
+    { id: "bass", name: "Black sea bass", src: "fish/bass.jpg" },
+    { id: "tuna", name: "Tuna", src: "fish/tuna.jpg" },
+    { id: "monkfish", name: "Monkfish", src: "fish/monkfish.jpg" },
+    { id: "lobster", name: "Lobster", src: "fish/lobster.jpg" },
+    { id: "sole", name: "Sole", src: "fish/sole.jpg" }
   ];
   var COOK = ["Pan", "Oven", "Grill", "Barely", "I don't"];
   var REACH = [
@@ -283,23 +270,26 @@
     "Only when my fish lands",
     "Only when it's special"
   ];
-  var COLOR_NOTE = {
-    green: "That's yours. I'll watch the boats.",
-    yellow: "Maybe. I'll keep it in mind.",
-    red: "Got it. I won't bring it."
-  };
   var COOK_NOTE = {
-    "Pan": "Pan. Easy.",
+    "Pan": "Pan. I'll remember that.",
     "Oven": "Oven. I'll remember.",
-    "Grill": "Grill. Got it.",
-    "Barely": "Barely. Good.",
-    "I don't": "You don't cook. I'll still find the fish."
+    "Grill": "Grill. I like that for you.",
+    "Barely": "Barely cooked. I'll remember.",
+    "I don't": "You don't cook. I'll still look out for you."
   };
   var REACH_NOTE = {
     "One text a day": "Once a day. I'll keep it short.",
-    "Only when my fish lands": "Only when it hits the dock.",
-    "Only when it's special": "Only when it's worth a text."
+    "Only when my fish lands": "Only when your fish hits the dock.",
+    "Only when it's special": "Only when it's worth it. I won't crowd you."
   };
+
+  function colorNote(fish, color) {
+    var n = fish.name.toLowerCase();
+    if (color === "green") return "Love it. I'll chase " + n + " for you.";
+    if (color === "yellow") return "Maybe. I'll remember " + n + ".";
+    if (color === "red") return "Heard you. No " + n + ".";
+    return "";
+  }
 
   var app = document.getElementById("app");
   var timer = null;
@@ -372,7 +362,7 @@
 
   function chaseLine() {
     var g = names("green");
-    if (!g.length) return "Nothing green. I'll wait till you want one.";
+    if (!g.length) return "Nothing green. I'll be here when you want one.";
     if (g.length === 1) return "I'll chase " + g[0].toLowerCase() + " when it lands.";
     return "I'll chase " + joinNames(g) + " when they land.";
   }
@@ -416,11 +406,9 @@
     if (state.step === "intro") {
       html = '<section class="screen">' +
         "<h1>I'm Red Bot.</h1>" +
-        '<p class="lede">Boats come in all night. We unload them. All weather. Fish boots. The families who caught it get paid, and somebody eats.</p>' +
-        '<p class="lede">Not a fancy app. The real chain.</p>' +
-        '<p class="lede">Green if you want it. Yellow if maybe. Red if you don\'t.</p>' +
+        '<p class="lede">Not a fancy app. We unload the boats, fish boots and all, for real families. We\'re excited you\'re here.</p>' +
         '<div class="grow"></div>' +
-        '<button class="go" type="button" data-act="show">Let me in</button>' +
+        '<button class="go" type="button" data-act="show">Let\'s go</button>' +
         "</section>";
     } else if (state.step === "name") {
       html = '<section class="screen">' + backBtn() +
@@ -438,8 +426,7 @@
         '<div class="veil"></div>' +
         '<div class="hud">' +
           '<h1 class="species">' + esc(fish.name) + "</h1>" +
-          '<p class="talk">' + esc(fish.talk) + "</p>" +
-          '<p class="confirm" id="note" aria-live="polite">' + esc(prev ? COLOR_NOTE[prev] : "") + "</p>" +
+          '<p class="confirm" id="note" aria-live="polite">' + esc(prev ? colorNote(fish, prev) : "") + "</p>" +
           '<div class="row">' +
             '<button class="swatch red' + (prev === "red" ? " on" : "") + '" type="button" data-c="red">Red</button>' +
             '<button class="swatch yellow' + (prev === "yellow" ? " on" : "") + '" type="button" data-c="yellow">Yellow</button>' +
@@ -465,14 +452,15 @@
       var habit = habitLine();
       html = '<section class="screen">' + backBtn() +
         '<h1 class="who">' + esc(state.name.trim() || "You") + "</h1>" +
-        '<p class="portrait">Call me the concierge on the pier. I unloaded the boats. Now I look out for your dinner.</p>' +
         '<p class="chase">' + esc(chaseLine()) + "</p>" +
         (aside ? '<p class="aside">' + esc(aside) + "</p>" : "") +
         (habit ? '<p class="habit">' + esc(habit) + "</p>" : "") +
-        '<p class="in">You\'re in. Past the wholesale chain, with the people who unload the boats.</p>' +
+        '<p class="portrait">I\'m glad you showed up. We\'re excited to start this with you.</p>' +
+        '<p class="portrait">Seafood is good for your body and your mind.</p>' +
+        '<p class="portrait">We unload the boats, and we take our role connecting you to the fishermen seriously.</p>' +
         '<div class="grow"></div>' +
         '<button class="go" type="button" data-act="done">This is me</button>' +
-        '<p class="saved" id="saved">' + (state.done ? "Saved. I'll watch the boats." : "") + "</p>" +
+        '<p class="saved" id="saved">' + (state.done ? "Saved. I\'m glad you\'re with us." : "") + "</p>" +
         "</section>";
     }
     app.innerHTML = html;
@@ -521,7 +509,7 @@
       state.step = "portrait";
       save();
       var saved = document.getElementById("saved");
-      if (saved) saved.textContent = "Saved. I'll watch the boats.";
+      if (saved) saved.textContent = "Saved. I\'m glad you\'re with us.";
     });
   }
 
@@ -545,11 +533,11 @@
 
   function pickFish(color) {
     var fish = FISH[state.fishIndex];
-    if (!fish || !COLOR_NOTE[color]) return;
+    if (!fish || !colorNote(fish, color)) return;
     state.reactions[fish.id] = color;
     save();
     var note = document.getElementById("note");
-    if (note) note.textContent = COLOR_NOTE[color];
+    if (note) note.textContent = colorNote(fish, color);
     app.querySelectorAll(".swatch").forEach(function (b) {
       b.classList.toggle("on", b.getAttribute("data-c") === color);
     });
